@@ -29,7 +29,12 @@ add_custom_target(COMMUNICATION_TIME ALL
 add_executable(integral src/integral.cpp)
 # target_compile_options()
 
-add_executable(1_lab src/1_lab.cpp)
+
+add_custom_target(1_lab ALL
+  COMMAND mpic++ ${CMAKE_CURRENT_SOURCE_DIR}/src/1_lab.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/1_lab
+) # mpiexec -n 4 ./1_lab
+
+add_executable(1_lab_thread src/1_lab_1_thread.cpp)
 
 
 # add_custom_command(TARGET MAIN_PROG POST_BUILD
@@ -37,4 +42,7 @@ add_executable(1_lab src/1_lab.cpp)
 #   COMMENT "Запуск MAIN_PROG..."
 # )
 
-add_executable(test src/trash.cpp)
+# add_executable(test src/test.cpp)
+add_custom_target(mpi_test ALL
+  COMMAND mpic++ ${CMAKE_CURRENT_SOURCE_DIR}/src/mpi_test.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/mpi_test
+) # mpiexec -n 4 ./mpi_test

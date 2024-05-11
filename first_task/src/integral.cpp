@@ -5,12 +5,25 @@
 #include <thread>
 #include <mutex>
 
-std::mutex cout_mutex;
+
+std::mutex cout_mutex, result_mutext;
+double result = 0.0;
+
+
+// I made this function only for training with lock_guard instead mutex.
+void add_to_result(double sum)
+{
+    std::lock_guard<std::mutex> guard(result_mutext);
+    result += sum;
+}
+
 
 inline double f(double x)
 {
-    return sin(1 / x);
+    return x;
+    // return sin(1 / x);
 }
+
 
 inline double f_deriv(double x)
 {
@@ -18,7 +31,7 @@ inline double f_deriv(double x)
 }
 
 
-double Integral(double from, double to)
+void Integral(double from, double to)
 {
     assert(from <= to);
 
@@ -38,7 +51,7 @@ double Integral(double from, double to)
     std::cout << "Computed: " << sum * step << std::endl;
     cout_mutex.unlock();
 
-    return sum * step;
+    add_to_result(sum * step);
 }
 
 
@@ -70,6 +83,7 @@ double LaunchParallelIntegral(int threads_number)
         thread.join();
     }
 
+    std::cout << "Result: " << result << std::endl;
 
     return 0;
 }
@@ -77,7 +91,7 @@ double LaunchParallelIntegral(int threads_number)
 
 int main(int argc, char **argv)
 {	
-    int threads_number = 4;
+    int threads_number = 1;
     LaunchParallelIntegral(threads_number);
 
     return 0;

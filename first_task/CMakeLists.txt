@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project("PARPROGA 1")
 set(CMAKE_CXX_STANDARD 17)
-SET(MYCOMPILE_FLAGS "-pthread")
 
+SET(MYCOMPILE_FLAGS "-pthread")
 SET(CMAKE_C_FLAGS    "${CMAKE_C_FLAGS} ${MYCOMPILE_FLAGS}")
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${MYCOMPILE_FLAGS}")
 
@@ -28,6 +28,8 @@ add_custom_target(COMMUNICATION_TIME ALL
 
 add_executable(integral src/integral.cpp)
 # target_compile_options()
+
+add_executable(1_lab src/1_lab.cpp)
 
 
 # add_custom_command(TARGET MAIN_PROG POST_BUILD

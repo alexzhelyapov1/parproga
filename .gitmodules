@@ -1,9 +1,0 @@
-[submodule "first_task/matplotplusplus"]
-	path = first_task/matplotplusplus
-	url = git@github.com:alandefreitas/matplotplusplus.git
-[submodule "test_matplot/matplotplusplus"]
-	path = test_matplot/matplotplusplus
-	url = git@github.com:alandefreitas/matplotplusplus.git
-[submodule "test_matplot/vcpkg"]
-	path = test_matplot/vcpkg
-	url = git@github.com:microsoft/vcpkg.git

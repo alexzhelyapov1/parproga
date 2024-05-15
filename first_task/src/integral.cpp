@@ -6,6 +6,9 @@
 #include <mutex>
 
 
+#define UNREACHABLE throw std::runtime_error("Something went wrong in function '" + std::string(__FUNCTION__) + "', line " + std::to_string(__LINE__) + ".");
+
+
 std::mutex cout_mutex, result_mutext;
 double result = 0.0;
 
@@ -20,7 +23,7 @@ void add_to_result(double sum)
 
 inline double f(double x)
 {
-    return x;
+    return sin(1 / x);
     // return sin(1 / x);
 }
 
@@ -57,33 +60,40 @@ void Integral(double from, double to)
 
 double LaunchParallelIntegral(int threads_number)
 {
-    double from = 1.1, to = 5.5;
+    double from = 0.1, to = 10;
     double from_local, to_local;
 
-    if (from > to) {
-        throw std::runtime_error("from > to");
+    if (from > to || from <= 0) {
+        UNREACHABLE
     }
 
+    int first_pic = (1 / from + 3 * M_PI / 2) / (2 * M_PI);
+    int last_pic = (1 / to + 3 * M_PI / 2) / (2 * M_PI);
+    // int number_of_pics = last_pic - first_pic;
 
-    std::vector<std::thread> threads;
+    std::cout << "Pics number: " << first_pic << " " << last_pic << std::endl;
 
-    for (int i = 0; i < threads_number; i++) {
+    
 
-        from_local = from + (to - from) / threads_number * i;
-        to_local = from + (to - from) / threads_number * (i + 1);
+    // std::vector<std::thread> threads;
 
-        if (i == threads_number - 1) {
-            to_local = to;
-        }
+    // for (int i = 0; i < threads_number; i++) {
 
-        threads.push_back(std::thread(Integral, from_local, to_local));
-    }
+    //     from_local = from + (to - from) / threads_number * i;
+    //     to_local = from + (to - from) / threads_number * (i + 1);
 
-    for (auto& thread : threads) {
-        thread.join();
-    }
+    //     if (i == threads_number - 1) {
+    //         to_local = to;
+    //     }
 
-    std::cout << "Result: " << result << std::endl;
+    //     threads.push_back(std::thread(Integral, from_local, to_local));
+    // }
+
+    // for (auto& thread : threads) {
+    //     thread.join();
+    // }
+
+    // std::cout << "Result: " << result << std::endl;
 
     return 0;
 }

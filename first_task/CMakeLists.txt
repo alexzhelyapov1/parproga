@@ -6,10 +6,10 @@ SET(MYCOMPILE_FLAGS "-pthread")
 SET(CMAKE_C_FLAGS    "${CMAKE_C_FLAGS} ${MYCOMPILE_FLAGS}")
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${MYCOMPILE_FLAGS}")
 
+
 find_package(MPI)
 
 file(GLOB SRC "code/src/*")
-
 
 
 add_custom_target(PI ALL
@@ -36,6 +36,11 @@ add_custom_target(1_lab ALL
 
 add_executable(1_lab_thread src/1_lab_1_thread.cpp)
 
+# add_executable(1_lab_new src/1_lab_new.cpp)
+add_custom_target(1_lab_new ALL
+  COMMAND mpic++ ${CMAKE_CURRENT_SOURCE_DIR}/src/1_lab_new.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/1_lab_new
+) # mpiexec -n 2 ./1_lab_new
+
 
 # add_custom_command(TARGET MAIN_PROG POST_BUILD
 #   COMMAND mpiexec -n 2 ${CMAKE_CURRENT_BINARY_DIR}/main
@@ -46,3 +51,7 @@ add_executable(1_lab_thread src/1_lab_1_thread.cpp)
 add_custom_target(mpi_test ALL
   COMMAND mpic++ ${CMAKE_CURRENT_SOURCE_DIR}/src/mpi_test.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/mpi_test
 ) # mpiexec -n 4 ./mpi_test
+
+
+# add_executable(test_matplot src/test_matplot.cpp)
+# target_link_libraries(test_matplot PUBLIC matplot)

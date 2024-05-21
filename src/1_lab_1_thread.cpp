@@ -63,7 +63,7 @@ int main() {
 
 
     // Вывод результата в файл .csv чтобы потом визуалилировать
-    std::ofstream outfile("/home/alex/parproga/first_task/gen/solution.csv");
+    std::ofstream outfile("/home/alex/parproga/gen/solution.csv");
     outfile << "t,x,u" << std::endl;
     for (int k = 0; k <= K; ++k) {
         for (int m = 0; m <= M; ++m) {

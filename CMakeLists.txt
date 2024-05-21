@@ -53,5 +53,11 @@ add_custom_target(mpi_test ALL
 ) # mpiexec -n 4 ./mpi_test
 
 
+add_custom_target(
+    compare_solutions
+    COMMAND diff -q /home/alex/parproga/gen/solution_new.csv /home/alex/parproga/gen/solution_new_new.csv
+    VERBATIM
+)
+
 # add_executable(test_matplot src/test_matplot.cpp)
 # target_link_libraries(test_matplot PUBLIC matplot)

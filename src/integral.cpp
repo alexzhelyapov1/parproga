@@ -4,13 +4,17 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 
 #define UNREACHABLE throw std::runtime_error("Something went wrong in function '" + std::string(__FUNCTION__) + "', line " + std::to_string(__LINE__) + ".");
 
+using namespace std;
 
 std::mutex cout_mutex, result_mutext;
 double result = 0.0;
+// or
+// std::atomic<double> result;
 
 
 // I made this function only for training with lock_guard instead mutex.
@@ -31,6 +35,53 @@ inline double f(double x)
 inline double f_deriv(double x)
 {
     return - cos(1 / x) / (x * x);
+}
+
+
+int countPeaks(double a, double b) {
+    int peaks = 0;
+    for (double x = a + 0.01; x < b; x += 0.01) {
+        if (f(x) * f(x - 0.01) < 0) {
+            peaks++;
+        }
+    }
+    return peaks;
+}
+
+
+// Функция для разбивки интервала на N интервалов с равномерным распределением пиков
+vector<double> createIntervals(double a, double b, int N) {
+    vector<double> intervals;
+    intervals.push_back(a);
+
+    // Определяем количество пиков на всем интервале
+    int totalPeaks = countPeaks(a, b);
+    std::cout << "Number of pics: " << totalPeaks << std::endl;
+
+    // Вычисляем желаемое количество пиков на каждом интервале
+    int peaksPerInterval = totalPeaks / N;
+
+    if (peaksPerInterval == 0) {
+        for (int i = 0; i < totalPeaks; i++) {
+            
+        }
+    }
+
+    // Делим интервал на N частей, учитывая количество пиков
+    double currentPosition = a;
+    int currentPeaks = 0;
+    for (int i = 1; i < N; i++) {
+        // Находим следующую точку разбиения, пока не достигнем желаемого количества пиков
+        while (currentPeaks < i * peaksPerInterval) {
+            currentPosition += 0.01;
+            currentPeaks += countPeaks(currentPosition - 0.01, currentPosition);
+        }
+            intervals.push_back(currentPosition);
+    }
+
+    intervals.push_back(b);
+
+    return intervals;
 }
 
 
@@ -73,27 +124,34 @@ double LaunchParallelIntegral(int threads_number)
 
     // std::cout << "Pics number: " << first_pic << " " << last_pic << std::endl;
 
+    vector<double> intervals = createIntervals(from, to, threads_number);
+
+    for (auto i : intervals) {
+        std::cout << i << " ";
+    }
+    std::cout << "\n";
+
     
 
-    std::vector<std::thread> threads;
+    // std::vector<std::thread> threads;
 
-    for (int i = 0; i < threads_number; i++) {
+    // for (int i = 0; i < threads_number; i++) {
 
-        from_local = from + (to - from) / threads_number * i;
-        to_local = from + (to - from) / threads_number * (i + 1);
+    //     from_local = from + (to - from) / threads_number * i;
+    //     to_local = from + (to - from) / threads_number * (i + 1);
 
-        if (i == threads_number - 1) {
-            to_local = to;
-        }
+    //     if (i == threads_number - 1) {
+    //         to_local = to;
+    //     }
 
-        threads.push_back(std::thread(Integral, from_local, to_local));
-    }
+    //     threads.push_back(std::thread(Integral, from_local, to_local));
+    // }
 
-    for (auto& thread : threads) {
-        thread.join();
-    }
+    // for (auto& thread : threads) {
+    //     thread.join();
+    // }
 
-    std::cout << "Result: " << result << std::endl;
+    // std::cout << "Result: " << result << std::endl;
 
     return 0;
 }
@@ -101,7 +159,7 @@ double LaunchParallelIntegral(int threads_number)
 
 int main(int argc, char **argv)
 {	
-    int threads_number = 1;
+    int threads_number = 2;
     LaunchParallelIntegral(threads_number);
 
     return 0;

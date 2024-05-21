@@ -67,33 +67,33 @@ double LaunchParallelIntegral(int threads_number)
         UNREACHABLE
     }
 
-    int first_pic = (1 / from + 3 * M_PI / 2) / (2 * M_PI);
-    int last_pic = (1 / to + 3 * M_PI / 2) / (2 * M_PI);
-    // int number_of_pics = last_pic - first_pic;
+    // int first_pic = (1 / from + 3 * M_PI / 2) / (2 * M_PI);
+    // int last_pic = (1 / to + 3 * M_PI / 2) / (2 * M_PI);
+    // // int number_of_pics = last_pic - first_pic;
 
-    std::cout << "Pics number: " << first_pic << " " << last_pic << std::endl;
+    // std::cout << "Pics number: " << first_pic << " " << last_pic << std::endl;
 
     
 
-    // std::vector<std::thread> threads;
+    std::vector<std::thread> threads;
 
-    // for (int i = 0; i < threads_number; i++) {
+    for (int i = 0; i < threads_number; i++) {
 
-    //     from_local = from + (to - from) / threads_number * i;
-    //     to_local = from + (to - from) / threads_number * (i + 1);
+        from_local = from + (to - from) / threads_number * i;
+        to_local = from + (to - from) / threads_number * (i + 1);
 
-    //     if (i == threads_number - 1) {
-    //         to_local = to;
-    //     }
+        if (i == threads_number - 1) {
+            to_local = to;
+        }
 
-    //     threads.push_back(std::thread(Integral, from_local, to_local));
-    // }
+        threads.push_back(std::thread(Integral, from_local, to_local));
+    }
 
-    // for (auto& thread : threads) {
-    //     thread.join();
-    // }
+    for (auto& thread : threads) {
+        thread.join();
+    }
 
-    // std::cout << "Result: " << result << std::endl;
+    std::cout << "Result: " << result << std::endl;
 
     return 0;
 }

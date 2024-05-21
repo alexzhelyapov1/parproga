@@ -12,8 +12,8 @@
 #define LEFT_VALUE 1
 #define RIGHT_VALUE 2
 
-double **ideal;
 
+double **ideal;
 double **Ideal();
 
 int rank, threads_number;
@@ -59,7 +59,7 @@ void ThreadCompute(const int m_from, const int m_to,
     double u_recvd_left = 0;
     double u_recvd_right = 0;
 
-    std::cout << "m_from = " << m_from << ", m_to = " << m_to << ", m_range = " << m_range << std::endl;
+    // std::cout << "m_from = " << m_from << ", m_to = " << m_to << ", m_range = " << m_range << std::endl;
 
     // Выделение памяти для решения
     double** u = new double*[K + 1];
@@ -71,10 +71,6 @@ void ThreadCompute(const int m_from, const int m_to,
     // Начальное условие
     for (int m = 0; m < m_range; ++m) {
         u[0][m] = phi((m + m_from) * h);
-
-        if (u[0][m] != ideal[0][m + m_from]) {
-            UNREACHABLE
-        }
     }
 
 
@@ -90,22 +86,11 @@ void ThreadCompute(const int m_from, const int m_to,
         // Граничное условие
         for (int k = 0; k <= K; ++k) {
             u[k][0] = psi(k * tau);
-
-            if (u[k][0] != ideal[k][0]) {
-                UNREACHABLE
-            }
         }
-
-        std::cout << "Edge done!\n";
     }
     else {
         MPI_Recv(&u_recvd_left, 1, MPI_DOUBLE, rank - 1, LEFT_VALUE, MPI_COMM_WORLD, &status);
-        // UNREACHABLE
         u[1][0] = u[0][0] - a * tau / h * (u[0][0] - u_recvd_left) + tau * f(0, m_from * h);
-        if (u[1][0] != ideal[1][m_from]) {
-            std::cout << "--\n" << u[0][0] << ", " << u_recvd_left << ", " << f(0, m_from * h) << ", " << m_from << "\n--\n";
-            UNREACHABLE
-        }
     }
 
 
@@ -113,10 +98,6 @@ void ThreadCompute(const int m_from, const int m_to,
     // Первый временной слой (k = 0) - схема левый уголок
     for (int m = 1; m < m_range; ++m) {
         u[1][m] = u[0][m] - a * tau / h * (u[0][m] - u[0][m - 1]) + tau * f(0, (m + m_from) * h);
-
-        if (u[1][m] != ideal[1][m + m_from]) {
-            UNREACHABLE
-        }
     }
 
 
@@ -124,7 +105,6 @@ void ThreadCompute(const int m_from, const int m_to,
     for (int k = 1; k < K; ++k) {
 
         if (m_from != 0) {
-            // UNREACHABLE
             MPI_Send(u[k], 1, MPI_DOUBLE, rank - 1, RIGHT_VALUE, MPI_COMM_WORLD);
         }
         else {
@@ -133,11 +113,11 @@ void ThreadCompute(const int m_from, const int m_to,
             }
             // Граничное условие
             // u[k][0] = psi((k) * tau);
+            // u[k + 1][0] = psi((k + 1) * tau);
         }
 
 
         if (m_to != M + 1) {
-            // UNREACHABLE
             MPI_Send(u[k] + m_range - 1, 1, MPI_DOUBLE, rank + 1, LEFT_VALUE, MPI_COMM_WORLD);
         }
 
@@ -145,11 +125,6 @@ void ThreadCompute(const int m_from, const int m_to,
 
         for (int m = 1; m < m_range - 1; ++m) {
             u[k + 1][m] = u[k - 1][m] - a * tau / h * (u[k][m + 1] - u[k][m - 1]) + 2 * tau * f(k * tau, (m + m_from) * h);
-
-            if (u[k + 1][m] != ideal[k + 1][m + m_from]) {
-                std::cout << "k = " << k << ", m = " << m << std::endl;
-                UNREACHABLE
-            }
 
             double u_t = u_teor((k + 1) * tau, (m + m_from) * h);
             double rel_err = (u[k + 1][m] - u_t) / u_t * 100;
@@ -170,10 +145,6 @@ void ThreadCompute(const int m_from, const int m_to,
             }
 
             u[k + 1][m_range - 1] = u[k][m_range - 1] - a * tau / h * (u[k][m_range - 1] - u[k][m_range - 2]) + tau * f(k * tau, M * h);
-
-            if (u[k + 1][m_range - 1] != ideal[k + 1][m_range - 1 + m_from]) {
-                UNREACHABLE
-            }
         }
         else {
             MPI_Recv(&u_recvd_right, 1, MPI_DOUBLE, rank + 1, RIGHT_VALUE, MPI_COMM_WORLD, &status);
@@ -195,7 +166,7 @@ void ThreadCompute(const int m_from, const int m_to,
         }
     }
 
-    std::cout << "All is correct!\n";
+    // std::cout << "All is correct!\n";
 
     double *buffer = new double[(K + 1) * m_range];
 
@@ -290,16 +261,6 @@ int main(int argc, char **argv)
         outfile.close();
 
 
-        // std::ofstream outfile1("/home/alex/parproga/gen/ideal.csv");
-        // outfile1 << "t,x,u" << std::endl;
-        // for (int k = 0; k <= K; ++k) {
-        //     for (int m = 0; m <= M; ++m) {
-        //         outfile1 << k * tau << "," << m * h << "," << ideal[k][m] << std::endl;
-        //     }
-        // }
-        // outfile1.close();
-
-
         // Освобождение памяти
         for (int k = 0; k <= K; ++k) {
             delete[] u[k];
@@ -353,11 +314,6 @@ double **Ideal() {
     // Первый временной слой (k = 0) - схема левый уголок
     for (int m = 1; m <= M; ++m) {
         u[1][m] = u[0][m] - a * tau / h * (u[0][m] - u[0][m - 1]) + tau * f(0, m * h);
-
-        // if (m == 33 || m == 66) {
-        //     std::cout << "----\n" << u[0][m] << ", " << u[0][m - 1] << ", " << f(0, m * h) << ", " << m << "\n----\n";
-        // }
-        
     }
 
     // Остальные временные слои (k = 1, 2, ..., K-1) - схема крест

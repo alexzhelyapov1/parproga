@@ -1,27 +1,19 @@
 #include <iostream>
 #include <omp.h>
-#include <mutex>
-#include <condition_variable>
 
 int main() {
     int shared_variable = 0;
-    std::mutex mtx;
-    std::condition_variable cv;
-    int current_thread = 0;
+    int total_threads = omp_get_max_threads();
 
-
-    #pragma omp parallel shared(shared_variable, mtx, cv, current_thread)
-    {
+    #pragma omp parallel for ordered num_threads(total_threads) shared(shared_variable) schedule(static, 1)
+    for (int i = 0; i < total_threads; ++i) {
         int thread_id = omp_get_thread_num();
 
-        std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [&](){ return thread_id == current_thread; });
-
-        std::cout << "Thread: " << thread_id << ", shared_variable before action: "
-            << shared_variable++ << ", shared_variable after action: " << shared_variable << std::endl;
-
-        current_thread++;
-        cv.notify_all();
+        #pragma omp ordered
+        {
+            std::cout << "Thread: " << thread_id << ", shared_variable before action: "
+                << shared_variable++ << ", shared_variable after action: " << shared_variable << std::endl;
+        }
     }
 
     return 0;
